@@ -1,0 +1,68 @@
+pipeline {
+  environment {
+    registry = "bineesh13487/nodejssample
+    registryCredential = xxxxxxxx
+    dockerImage = "
+  }
+  
+agent docker
+  
+stages {
+    stage('Cloning Git') {
+      steps {
+        git https://github.com/bineesh13487/DevOps
+      }
+    }
+
+
+stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+
+//Test cases should be here. I'm not mentioning the exact steps as i'm not much confident about it
+
+stage('Test case') {
+      steps{
+        script {
+          Test case goes here
+        }
+      }
+    }
+
+        stage('Deploy Image') {
+      steps{
+         script {
+            docker.withRegistry( ",registryCredential ) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
+  
+stage('Notification'){
+   steps{                                  
+     notifyBuild(currentBuild.result = "SUCCESS");
+                                                                                    }
+                                                                               }         
+ 
+//send out mail with build results, job url etc      
+    def notifyBuild(buildStatus=currentBuild.result){
+                   echo "Notify Build Method Called";
+                   buildStatus =  buildStatus ?: 'SUCCESSFUL'
+                                                                   echo "${currentBuild.result}";
+                // Default values
+                   def subject = "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+                   def summary = "${subject} (${env.BUILD_URL})"
+                   emailext (subject: subject,
+                   body :'''${SCRIPT, template="groovy-html-email-build.template"}''',
+                   to: bineesh13487@gmail.com,
+                   mimeType: 'text/html'
+                )
+                }
+
+}
+}
